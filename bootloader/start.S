@@ -52,19 +52,19 @@ seta20.2:
 
 .code32
 start32:
-	movw  $GDT_ENTRY(2), %ax 	#代码数据段
+	movw  $GDT_ENTRY(2), %ax 	
 	movw %ax, %ds
 	movw %ax, %es 
 	movw %ax, %ss
 
-	movw $GDT_ENTRY(3), %ax     #视频段
+	movw $GDT_ENTRY(3), %ax     
 	movw %ax, %gs           
 
-loop:
 	movl $0x8000, %esp
 	movl $0x0,	%ebp
 	jmp bootMain
 	
+loop:	
 	jmp loop
 	
 
