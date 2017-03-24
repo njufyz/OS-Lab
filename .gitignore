@@ -2,4 +2,4 @@
 *.img
 *.bin
 *.elf
-.DS_Store
+*/.DS_Store
