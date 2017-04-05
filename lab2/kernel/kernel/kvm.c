@@ -1,6 +1,7 @@
 #include "x86.h"
 #include "device.h"
 
+
 SegDesc gdt[NR_SEGMENTS];
 TSS tss;
 
@@ -27,6 +28,23 @@ void readSect(void *dst, int offset) {
 	}
 }
 
+void readseg(uint32_t pa, uint32_t count, uint32_t offset)
+{
+	uint32_t end_pa;
+
+	end_pa = pa + count;
+	
+	pa -= offset % SECTSIZE;
+
+	offset = (offset / SECTSIZE) + 1;
+
+	while (pa < end_pa) {
+		readSect((uint8_t*) pa, offset);
+		pa += SECTSIZE;
+		offset++;
+	}
+}
+
 void initSeg() {
 	gdt[SEG_KCODE] = SEG(STA_X | STA_R, 0,       0xffffffff, DPL_KERN);
 	gdt[SEG_KDATA] = SEG(STA_W,         0,       0xffffffff, DPL_KERN);
@@ -39,9 +57,20 @@ void initSeg() {
 	/*
 	 * 初始化TSS
 	 */
+	tss.ss0 = KSEL(SEG_KDATA);
+	tss.esp0 = 0x190000;
 	asm volatile("ltr %%ax":: "a" (KSEL(SEG_TSS)));
 
 	/*设置正确的段寄存器*/
+	//movw    %ax,%ds             # -> Data Segment
+	asm volatile("movw %%ax,%%ds":: "a" (KSEL(SEG_KDATA)));
+
+   	//movw    %ax,%es             # -> Extra Segment
+	asm volatile("movw %%ax,%%es":: "a" (KSEL(SEG_KDATA)));
+
+ 	//movw    %ax,%ss             # -> Stack Segment
+	asm volatile("movw %%ax,%%ss":: "a" (KSEL(SEG_KDATA)));
+
 
 	lLdt(0);
 	
@@ -53,11 +82,39 @@ void enterUserSpace(uint32_t entry) {
 	 * you should set the right segment registers here
 	 * and use 'iret' to jump to ring3
 	 */
+	
+	asm volatile("pushl %%ax":: "a" (USEL(SEG_UDATA)));
+	asm volatile("pushl %%eax":: "a" (0x500000));
+	asm volatile("pushfl");
+	asm volatile("pushl %%ax":: "a" (USEL(SEG_UCODE)));
+	asm volatile("pushl %%eax":: "a" (entry));
 	asm volatile("iret");
 }
 
 void loadUMain(void) {
 
-	/*加载用户程序至内存*/
+	
+	ELF* Elf = (ELF*)0x10000; 
+	readseg((uint32_t)Elf, SECTSIZE * 8, SECTSIZE * 200);
+	
+	if(Elf->magic != 0x464C457FU ) 
+		while(1);
+
+	Proghdr* ph = (Proghdr*)( (uint8_t*)Elf + Elf->phoff);
+	Proghdr* end_ph = ph + Elf->phnum;
+	for(; ph < end_ph; ph++)
+	{
+		uint8_t *i = (uint8_t *)(ph->paddr +  ph->filesz);
+		if(ph->type == 1)
+			{
+				readseg((uint32_t)ph->paddr, ph->filesz, ph->off + SECTSIZE * 200);
+				for(;i<(uint8_t *)(ph->paddr + ph->memsz);*i++=0);
+			}
+	}
+
+	if(Elf->entry != 0x200000) 
+		while(1);
+
+	enterUserSpace((uint32_t)Elf->entry);
 
 }

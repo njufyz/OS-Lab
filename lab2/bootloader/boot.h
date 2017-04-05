@@ -1,7 +1,10 @@
 #ifndef BOOT_H
 #define BOOT_H
 
-struct ELFHeader {
+typedef  unsigned int  uint32_t;
+typedef  unsigned char uint8_t;
+
+typedef struct ELFHeader {
 	unsigned int   magic;
 	unsigned char  elf[12];
 	unsigned short type;
@@ -17,10 +20,10 @@ struct ELFHeader {
 	unsigned short shentsize;
 	unsigned short shnum;
 	unsigned short shstrndx;
-};
+}ELF;
 
 /* ELF32 Program header */
-struct ProgramHeader {
+typedef struct ProgramHeader {
 	unsigned int type;
 	unsigned int off;
 	unsigned int vaddr;
@@ -29,11 +32,13 @@ struct ProgramHeader {
 	unsigned int memsz;
 	unsigned int flags;
 	unsigned int align;
-};
+}Proghdr;
+
 
 void waitDisk(void);
 
 void readSect(void *dst, int offset);
+void readseg(uint32_t pa, uint32_t count, uint32_t offset);
 
 /* I/O functions */
 static inline char inByte(short port) {

@@ -1,7 +1,7 @@
 #ifndef __X86_IO_H__
 #define __X86_IO_H__
 /* ELF32二进制文件头 */
-struct ELFHeader {
+typedef struct ELFHeader {
 	unsigned int   magic;
 	unsigned char  elf[12];
 	unsigned short type;
@@ -17,10 +17,10 @@ struct ELFHeader {
 	unsigned short shentsize;
 	unsigned short shnum;
 	unsigned short shstrndx;
-};
+}ELF;
 
 /* ELF32 Program header */
-struct ProgramHeader {
+typedef struct ProgramHeader {
 	unsigned int type;
 	unsigned int off;
 	unsigned int vaddr;
@@ -29,7 +29,7 @@ struct ProgramHeader {
 	unsigned int memsz;
 	unsigned int flags;
 	unsigned int align;
-};
+}Proghdr;
 
 
 static inline int inLong(short port) {
