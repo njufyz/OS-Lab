@@ -80,7 +80,8 @@ void initIdt() {
 	setTrap(idt + 0xd, SEG_KCODE, (uint32_t)vec13, DPL_KERN);
 	setTrap(idt + 0xe, SEG_KCODE, (uint32_t)vec14, DPL_KERN);
 	
-	setIntr(idt + 0x80, SEG_KCODE, (uint32_t)vecsys, DPL_USER); // for int 0x80, interrupt vector is 0x80, Interruption is disabled
+	setIntr(idt + 0x80, SEG_KCODE, (uint32_t)vecsys, DPL_USER);
+	// for int 0x80, interrupt vector is 0x80, Interruption is disabled
 
 	setIntr(idt+32 + 0, SEG_KCODE << 3, (uint32_t)irq0, DPL_KERN);
 	setIntr(idt+32 + 1, SEG_KCODE << 3, (uint32_t)irq1, DPL_KERN);

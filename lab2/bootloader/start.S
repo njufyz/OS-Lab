@@ -3,8 +3,6 @@
 
 .global start
 start:
-
-
 	cli                             #关闭中断
 	xorw    %ax,%ax             # Segment number zero
  	movw    %ax,%ds             # -> Data Segment

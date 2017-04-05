@@ -63,13 +63,13 @@ void initSeg() {
 
 	/*设置正确的段寄存器*/
 	//movw    %ax,%ds             # -> Data Segment
-	asm volatile("movw %%ax,%%ds":: "a" (KSEL(SEG_KDATA)));
+	asm volatile("movw %%ax, %%ds":: "a" (KSEL(SEG_KDATA)));
 
    	//movw    %ax,%es             # -> Extra Segment
-	asm volatile("movw %%ax,%%es":: "a" (KSEL(SEG_KDATA)));
+	asm volatile("movw %%ax, %%es":: "a" (KSEL(SEG_KDATA)));
 
  	//movw    %ax,%ss             # -> Stack Segment
-	asm volatile("movw %%ax,%%ss":: "a" (KSEL(SEG_KDATA)));
+	asm volatile("movw %%ax, %%ss":: "a" (KSEL(SEG_KDATA)));
 
 
 	lLdt(0);
@@ -82,18 +82,20 @@ void enterUserSpace(uint32_t entry) {
 	 * you should set the right segment registers here
 	 * and use 'iret' to jump to ring3
 	 */
-	
-	asm volatile("pushl %%ax":: "a" (USEL(SEG_UDATA)));
+
+	asm volatile("movw %%ax, %%ds":: "a" (USEL(SEG_UDATA)));
+	asm volatile("movw %%ax, %%es":: "a" (USEL(SEG_UDATA)));
+
+	asm volatile("pushl %%eax":: "a" (USEL(SEG_UDATA)));
 	asm volatile("pushl %%eax":: "a" (0x500000));
 	asm volatile("pushfl");
-	asm volatile("pushl %%ax":: "a" (USEL(SEG_UCODE)));
+	asm volatile("pushl %%eax":: "a" (USEL(SEG_UCODE)));
 	asm volatile("pushl %%eax":: "a" (entry));
 	asm volatile("iret");
 }
 
 void loadUMain(void) {
 
-	
 	ELF* Elf = (ELF*)0x10000; 
 	readseg((uint32_t)Elf, SECTSIZE * 8, SECTSIZE * 200);
 	
@@ -111,9 +113,6 @@ void loadUMain(void) {
 				for(;i<(uint8_t *)(ph->paddr + ph->memsz);*i++=0);
 			}
 	}
-
-	if(Elf->entry != 0x200000) 
-		while(1);
 
 	enterUserSpace((uint32_t)Elf->entry);
 

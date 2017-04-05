@@ -10,16 +10,22 @@ void bootMain(void) {
 	
 	ELF* Elf = (ELF*)0x10000; 
 	readseg((uint32_t)Elf, SECTSIZE * 8, 0);
-
 	Proghdr* ph = (Proghdr*)( (uint8_t*)Elf + Elf->phoff);
+
+	if(Elf->magic != 0x464C457FU ) 
+		while(1);
+
 	Proghdr* end_ph = ph + Elf->phnum;
 	for(; ph < end_ph; ph++)
 	{
-		uint8_t *i = (uint8_t *)(ph->paddr +  ph->filesz);
-		readseg((uint32_t)ph->paddr, ph->memsz, ph->off);
-		for(; i<(uint8_t *)(ph->paddr + ph->memsz); *i++=0);
+		if(ph->type == 1)
+		{	
+			uint8_t *i = (uint8_t *)(ph->paddr +  ph->filesz);
+			readseg((uint32_t)ph->paddr, ph->memsz, ph->off);
+			for(; i<(uint8_t *)(ph->paddr + ph->memsz); *i++=0);
+		}
 	}
-	
+
 	((void (*)(void)) (Elf->entry))();
 	
 }

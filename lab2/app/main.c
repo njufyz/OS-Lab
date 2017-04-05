@@ -1,7 +1,6 @@
 #include "lib.h"
 #include "types.h"
 
-
 int uEntry(void) {
 
 	printf("printf test begin...\n");
