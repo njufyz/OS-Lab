@@ -1,9 +1,12 @@
 #include "x86.h"
 #include "device.h"
 
+#define base 0x00200000
 
 SegDesc gdt[NR_SEGMENTS];
 TSS tss;
+
+extern PCB idle;
 
 #define SECTSIZE 512
 
@@ -48,8 +51,8 @@ void readseg(uint32_t pa, uint32_t count, uint32_t offset)
 void initSeg() {
 	gdt[SEG_KCODE] = SEG(STA_X | STA_R, 0,       0xffffffff, DPL_KERN);
 	gdt[SEG_KDATA] = SEG(STA_W,         0,       0xffffffff, DPL_KERN);
-	gdt[SEG_UCODE] = SEG(STA_X | STA_R, 0,       0xffffffff, DPL_USER);
-	gdt[SEG_UDATA] = SEG(STA_W,         0,       0xffffffff, DPL_USER);
+	gdt[SEG_UCODE] = SEG(STA_X | STA_R, base,    base      , DPL_USER);
+	gdt[SEG_UDATA] = SEG(STA_W,         base,    base      , DPL_USER);
 	gdt[SEG_TSS] = SEG16(STS_T32A,      &tss, sizeof(TSS)-1, DPL_KERN);
 	gdt[SEG_TSS].s = 0;
 	setGdt(gdt, sizeof(gdt));
@@ -58,7 +61,7 @@ void initSeg() {
 	 * 初始化TSS
 	 */
 	tss.ss0 = KSEL(SEG_KDATA);
-	tss.esp0 = 0x190000;
+	tss.esp0 = 0x180000;
 	asm volatile("ltr %%ax":: "a" (KSEL(SEG_TSS)));
 
 	/*设置正确的段寄存器*/
@@ -87,14 +90,16 @@ void enterUserSpace(uint32_t entry) {
 	asm volatile("movw %%ax, %%es":: "a" (USEL(SEG_UDATA)));
 
 	asm volatile("pushl %%eax":: "a" (USEL(SEG_UDATA)));
-	asm volatile("pushl %%eax":: "a" (0x500000));
+	asm volatile("pushl %%eax":: "a" (0x200000));
 	asm volatile("pushfl");
 	asm volatile("pushl %%eax":: "a" (USEL(SEG_UCODE)));
 	asm volatile("pushl %%eax":: "a" (entry));
 	asm volatile("iret");
 }
 
-void loadUMain(void) {
+
+
+uint32_t loadUMain(void) {
 
 	ELF* Elf = (ELF*)0x10000; 
 	readseg((uint32_t)Elf, SECTSIZE * 8, SECTSIZE * 200);
@@ -106,14 +111,15 @@ void loadUMain(void) {
 	Proghdr* end_ph = ph + Elf->phnum;
 	for(; ph < end_ph; ph++)
 	{
-		uint8_t *i = (uint8_t *)(ph->paddr +  ph->filesz);
+		uint8_t *i = (uint8_t *)(ph->paddr +  ph->filesz + base);
 		if(ph->type == 1)
 			{
-				readseg((uint32_t)ph->paddr, ph->filesz, ph->off + SECTSIZE * 200);
-				for(;i<(uint8_t *)(ph->paddr + ph->memsz);*i++=0);
+				readseg((uint32_t)(ph->paddr + base), ph->filesz, ph->off + SECTSIZE * 200);
+				for(;i<(uint8_t *)(ph->paddr + ph->memsz + base ); *i++ = 0);
 			}
 	}
-
-	enterUserSpace((uint32_t)Elf->entry);
-
+	return Elf->entry;
+//	enterUserSpace((uint32_t)Elf->entry);
 }
+
+#undef base

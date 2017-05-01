@@ -37,10 +37,28 @@ struct GateDescriptor {
 	uint32_t offset_31_16     : 16;
 };
 
-struct TrapFrame {
+/*struct TrapFrame {
 	uint32_t edi, esi, ebp, xxx, ebx, edx, ecx, eax;
 	int32_t irq;
+};*/
+
+struct TrapFrame {
+    uint32_t es, ds;
+    uint32_t edi, esi, ebp, xxx, ebx, edx, ecx, eax;
+    uint32_t irq;                   // 中断号
+    uint32_t error;                 // Error Code
+    uint32_t eip, cs, eflags, esp, ss;
 };
+typedef struct TrapFrame TrapFrame;
+
+typedef struct  {
+	TrapFrame *tf;
+	unsigned char stack[4096];
+	int state;
+	int time_count;
+	int sleep_time;
+	unsigned int pid;
+}PCB;
 
 /*
 1. The number of bits in a bit field sets the limit to the range of values it can hold

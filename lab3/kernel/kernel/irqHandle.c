@@ -1,6 +1,8 @@
 #include "x86.h"
 #include "device.h"
 
+extern PCB* current;
+extern TSS tss;
 
 void syscallHandle(struct TrapFrame *tf);
 
@@ -14,6 +16,9 @@ void irqHandle(struct TrapFrame *tf) {
 	 * 中断处理程序
 	 */
 	/* Reassign segment register */
+	current->tf = tf;
+	putChar(current->pid + '0');
+	putChar('\n');
 	switch(tf->irq) {
 		case -1:
 			break;
@@ -23,6 +28,13 @@ void irqHandle(struct TrapFrame *tf) {
 		case 0x80:
 			syscallHandle(tf);
 			break;
+		case 32:	
+			current = &pcb[0];
+			tss.esp0 = (uint32_t)current->stack + 4096;
+			break;
+		case 46:
+		    break;
+
 		default:assert(0);
 	}
 	

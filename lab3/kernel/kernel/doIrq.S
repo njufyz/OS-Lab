@@ -19,22 +19,37 @@
 
 .globl vecsys; vecsys:  pushl $0;  pushl $0x80; jmp asm_do_irq
 
-.globl irq0;     irq0:  pushl $0;  pushl $1000; jmp asm_do_irq
-.globl irq1;     irq1:  pushl $0;  pushl $1001; jmp asm_do_irq
-.globl irq14;   irq14:  pushl $0;  pushl $1014; jmp asm_do_irq
+.globl irq0;     irq0:  pushl $0;  pushl $32;   jmp asm_do_irq
+.globl irq1;     irq1:  pushl $0;  pushl $33;   jmp asm_do_irq
+.globl irq14;   irq14:  pushl $0;  pushl $46;   jmp asm_do_irq
 .globl irq_empty;
 			irq_empty:	pushl $0;  pushl   $-1; jmp asm_do_irq
 
 .globl asm_do_irq
 .extern irqHandle
+.extern current
 
 asm_do_irq:
 	pushal
 
+	push %ds
+	push %es
 	pushl %esp
+
+	movw $0x10, %ax
+	movw %ax,   %es
+	movw %ax,   %ds
+
 	call irqHandle
-	
-	addl $4, %esp
+
+	#addl $4, %esp
+	movl (current), %eax
+	movl (%eax), %esp
+
+	pop %es
+    pop %ds
+
 	popal
+
 	addl $8, %esp
 	iret

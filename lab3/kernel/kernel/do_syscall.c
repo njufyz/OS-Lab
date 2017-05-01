@@ -1,6 +1,6 @@
 #include "x86.h"
 #include "device.h"
-
+#define base  0x200000
 static int x = 0;
 static int y = 0;
 
@@ -20,7 +20,7 @@ static void clear(){
 }
 
 static void putc(char ch){
-     putChar(ch);
+     //putChar(ch);
 	if(ch != '\n')
 	{
 		int16_t* word = (int16_t *)0xB8000 + (y * 80 + x); 
@@ -52,6 +52,6 @@ void SYS_write(struct TrapFrame *tf)
 	assert(tf->eax == 4 && tf->ebx == 1);
 	if(x == 0 && y == 0)
 		clear();
-	puts(tf->ecx, tf->edx);
+	puts(tf->ecx + base, tf->edx);
     tf->eax = tf->edx;
 }

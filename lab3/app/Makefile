@@ -11,7 +11,7 @@ LCFILES = $(shell find ../lib -name "*.c")
 UOBJS = $(UCFILES:.c=.o) $(LCFILES:.c=.o)
 
 umain.bin: $(UOBJS)
-	$(LD) $(LDFLAGS) -e uEntry -Ttext 0x00200000 -o uMain.elf $(UOBJS)
+	$(LD) $(LDFLAGS) -e uEntry -Ttext 0x0 -o uMain.elf $(UOBJS)
 
 clean:
 	rm -rf $(UOBJS) uMain.elf
