@@ -4,6 +4,6 @@
 #include "common/types.h"
 #include "common/const.h"
 #include "common/assert.h"
-
+#include "common/queue.h"
 
 #endif

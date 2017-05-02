@@ -59,11 +59,11 @@ void SyscallHandle(struct TrapFrame *tf) {
 	switch (tf->eax)
 	{
 		case SYS_EXIT:  tf->eax = SYS_exit(tf);  break;
-		case SYS_FORK:  SYS_fork(tf);  break;
+		case SYS_FORK:  tf->eax = SYS_fork(tf);  break;
 
 		case SYS_WRITE: tf->eax = SYS_write(tf); break;
 		case SYS_SLEEP: tf->eax = SYS_sleep(tf); break;
-		case SYS_GETPID: tf->eax = SYS_getpid(tf); break;
+		case SYS_GETPID:tf->eax = SYS_getpid(tf); break;
 		default:assert(0);
 	}
 }
@@ -76,12 +76,14 @@ void GProtectFaultHandle(struct TrapFrame *tf){
 
 void TimerHandle(struct TrapFrame *tf){
 	putChar(current->pid + '0');
-	int i;
+	/*int i;
 	for(i = 0; i < PCB_MAX; i++)
 	{
 		if(pcb[i].state == RUNNING)
 		{
 			pcb[i].time_count--;
+			if(pcb[i].time_count <= 0)
+				pcb[i].state = BLOCKED;
 		}
 		if(pcb[i].state == BLOCKED)
 		{
@@ -90,12 +92,12 @@ void TimerHandle(struct TrapFrame *tf){
 				wake(i);
 		}
 	}
-
+	*/
 }
 
 void schedule()
 {
-	if(current != &idle && current->time_count>0)
+	if(current != &idle && current->time_count > 0)
 		return ;
 
     if(current == &idle)
@@ -114,40 +116,49 @@ void schedule()
 				current->state = RUNNING;
 				current->time_count = RUNTIME;
 			}
+		else 
+		{
+				current->state = RUNNABLE;
+				current = &pcb[0];
+				current->state = RUNNING;
+				current->time_count = RUNTIME;
+		}
 	}
 
-	else if(pcb[0].state == RUNNING)
+	else if(pcb[0].state == RUNNING || pcb[0].state == BLOCKED)
 	{
 		if(pcb[1].state == RUNNABLE)
 		{
-			current->state = RUNNABLE;
-			current->time_count = RUNTIME;
+			current->state = BLOCKED;
+			current->time_count = 0;
 			current = &pcb[1];
 			current->state = RUNNING;
 			current->time_count = RUNTIME;
 		}
 		else 
 		{
-			current->state = RUNNABLE;
+			current->state = BLOCKED;
+			current->time_count = 0;
 			current = &idle;
 			current->state = RUNNING;
 			current->time_count = RUNTIME;
 		}
 	}
 
-	else if(pcb[1].state == RUNNING)
+	else if(pcb[1].state == RUNNING || pcb[1].state == BLOCKED)
 	{
 		if(pcb[0].state == RUNNABLE)
 		{
-			current->state = RUNNABLE;
-			current->time_count = RUNTIME;
+			current->state = BLOCKED;
+			current->time_count = 0;
 			current = &pcb[0];
 			current->state = RUNNING;
 			current->time_count = RUNTIME;
 		}
 		else 
 		{
-			current->state = RUNNABLE;
+			current->state = BLOCKED;
+			current->time_count = 0;
 			current = &idle;
 			current->state = RUNNING;
 			current->time_count = RUNTIME;
@@ -160,6 +171,7 @@ void schedule()
 
 void wake(int i)
 {
-	return ;
+	pcb[i].state = RUNNABLE;
+	pcb[i].time_count = RUNTIME;
 }
 

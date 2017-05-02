@@ -141,7 +141,7 @@ static inline void lLdt(uint16_t sel)
 }
 
 
-static inline void* memcpy_s(void* dest, void* src, uint32_t count)
+static inline void* memcpy(void* dest, void* src, uint32_t count)
 {
  char *tmp = dest;  
  const char *s = src;  
