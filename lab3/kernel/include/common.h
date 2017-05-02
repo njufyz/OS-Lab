@@ -5,4 +5,5 @@
 #include "common/const.h"
 #include "common/assert.h"
 
+void printk(const char*fmt, ...);
 #endif

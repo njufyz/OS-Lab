@@ -50,4 +50,9 @@ static inline void outByte(uint16_t port, int8_t data) {
 	asm volatile("out %%al, %%dx" : : "a"(data), "d"(port));
 }
 
+void printk(const char*fmt, ...);
+void putc(char ch);
+void puts(uint32_t s, int lenth);
+
+
 #endif

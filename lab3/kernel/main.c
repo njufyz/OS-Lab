@@ -14,7 +14,7 @@ void kEntry(void) {
 	//loadUMain();
 	int Entry = loadUMain();
 	initUserProcess(Entry);
-	
+
 	asm volatile("movl %%eax, %%esp":: "a" (idle.stack + 4096));
 	
 	enableInterrupt();

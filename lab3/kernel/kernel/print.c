@@ -1,9 +1,57 @@
-#include "lib.h"
-#include "types.h"
-
 #include<stdarg.h>
+#include "x86.h"
+#include "device.h"
 
 #define NULL ((void*)0)
+
+int x = 0;
+int y = 0;
+
+void clear(){
+	int i = 0;
+	int j = 0;
+	int16_t* word;
+
+	for(; j < 25;j++)
+	{
+	for(i = 0; i<80; i++)
+	  {	
+		word = (int16_t *)0xB8000 + (j * 80 + i); 
+    	*word = ' ' | (0xc << 8);
+	  } 
+	}
+}
+
+void putc(char ch){
+     //putChar(ch);
+	if(ch != '\n')
+	{
+		int16_t* word = (int16_t *)0xB8000 + (y * 80 + x); 
+    	*word = ch | (0xc << 8);
+		if(++x == 80)
+		{
+			x = 0;
+			y++;
+		}
+	}
+	else
+	{
+		x = 0;
+		y++;
+	}
+}
+
+void puts(uint32_t s, int lenth)
+{
+	if(x == 0 && y == 0)
+		clear();
+	int i = 0;
+	char* str = (char*)s;
+
+	while(i < lenth)
+		putc(str[i++]);
+}
+
 int strlen(const char* str)
 {
 	int i = 0;
@@ -27,22 +75,7 @@ void strcat(char*dest, const char*s)
 		dest[i]=s[j];
 }
 
-/*
- * io lib here
- * 库函数写在这
- */
-int32_t syscall(int num, uint32_t a1,uint32_t a2,
-		uint32_t a3, uint32_t a4, uint32_t a5)
-{
-	int32_t ret = 0;
-
-	/* 内嵌汇编 保存 num, a1, a2, a3, a4, a5 至通用寄存器*/
-
-	asm volatile("int $0x80": "=a"(ret): "a"(num), "b"(a1), "c"(a2), "d"(a3));	
-	return ret;
-}
-
-static int itoa(int m, char* s, int radix)
+int itoa(int m, char* s, int radix)
 {
     if(m == 0)
     {
@@ -81,7 +114,7 @@ static int itoa(int m, char* s, int radix)
     return i;
 }
 
-static int itoa_x(unsigned m, char* s)
+int itoa_x(unsigned m, char* s)
 {
     int ret;
     if(!(m>>31 & 1))
@@ -108,7 +141,7 @@ static int itoa_x(unsigned m, char* s)
     return ret;
 }
 
-void printf(const char* fmt,...)
+void printk(const char* fmt,...)
 {
     char str[256] = { 0 };
     char* p =str;
@@ -139,20 +172,5 @@ void printf(const char* fmt,...)
         }
     }
     va_end(arg);
-	syscall(SYS_WRITE, 1, (uint32_t)str, strlen(str), 0, 0);
-}
-
-int fork()
-{
-    return syscall(SYS_FORK, 0, 0, 0, 0, 0);
-}
-
-int sleep(uint32_t time)
-{
-    return syscall(SYS_SLEEP, 0, 0, 0, 0, 0);
-}
-
-int exit()
-{
-     return syscall(SYS_EXIT, 0, 0, 0, 0, 0);
+	puts((uint32_t)str, strlen(str));
 }

@@ -1,8 +1,6 @@
 #include "x86.h"
 #include "device.h"
 
-#define base 0x00200000
-
 SegDesc gdt[NR_SEGMENTS];
 TSS tss;
 

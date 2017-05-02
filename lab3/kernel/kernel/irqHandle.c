@@ -8,8 +8,11 @@ void syscallHandle(struct TrapFrame *tf);
 
 void GProtectFaultHandle(struct TrapFrame *tf);
 
-void SYS_write(struct TrapFrame *tf);
 
+void SYS_exit(struct TrapFrame *tf);
+void SYS_fork(struct TrapFrame *tf);
+void SYS_write(struct TrapFrame *tf);
+void SYS_sleep(struct TrapFrame *tf);
 
 void irqHandle(struct TrapFrame *tf) {
 	/*
@@ -43,11 +46,21 @@ void irqHandle(struct TrapFrame *tf) {
 
 void syscallHandle(struct TrapFrame *tf) {
 	/* 实现系统调用*/
-	if(tf->eax == 4)		//SYS_write
+	/*if(tf->eax == 4)		//SYS_write
 		SYS_write(tf);		//Implement in do_syscall.c
 	
 	else 				
 		assert(0);
+		*/
+	switch (tf->eax)
+	{
+		case SYS_EXIT:  SYS_exit(tf);    break;
+		case SYS_FORK:  SYS_fork(tf);  break;
+
+		case SYS_WRITE: SYS_write(tf); break;
+		case SYS_SLEEP: SYS_sleep(tf); break;
+		default:assert(0);
+	}
 }
 
 

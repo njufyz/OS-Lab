@@ -1,6 +1,8 @@
 #ifndef __X86_MEMORY_H__
 #define __X86_MEMORY_H__
 
+#define base 0x200000
+
 #define DPL_KERN                0
 #define DPL_USER                3
 

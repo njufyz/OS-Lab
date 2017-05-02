@@ -2,5 +2,6 @@
 #define __lib_h__
 
 void printf(const char *format,...);
+int fork();
 
 #endif
