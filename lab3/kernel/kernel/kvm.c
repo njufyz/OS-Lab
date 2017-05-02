@@ -51,6 +51,8 @@ void initSeg() {
 	gdt[SEG_KDATA] = SEG(STA_W,         0,       0xffffffff, DPL_KERN);
 	gdt[SEG_UCODE] = SEG(STA_X | STA_R, base,    base      , DPL_USER);
 	gdt[SEG_UDATA] = SEG(STA_W,         base,    base      , DPL_USER);
+	gdt[SEG_UCODE_C] = SEG(STA_X | STA_R, base,  base      , DPL_USER);
+	gdt[SEG_UDATA_C] = SEG(STA_W,    2 * base,    base      , DPL_USER);
 	gdt[SEG_TSS] = SEG16(STS_T32A,      &tss, sizeof(TSS)-1, DPL_KERN);
 	gdt[SEG_TSS].s = 0;
 	setGdt(gdt, sizeof(gdt));
@@ -59,7 +61,7 @@ void initSeg() {
 	 * 初始化TSS
 	 */
 	tss.ss0 = KSEL(SEG_KDATA);
-	tss.esp0 = 0x180000;
+	tss.esp0 = (uint32_t)idle.stack + KSTACK_SIZE;
 	asm volatile("ltr %%ax":: "a" (KSEL(SEG_TSS)));
 
 	/*设置正确的段寄存器*/
@@ -95,8 +97,6 @@ void enterUserSpace(uint32_t entry) {
 	asm volatile("iret");
 }
 
-
-
 uint32_t loadUMain(void) {
 
 	ELF* Elf = (ELF*)0x10000; 
@@ -117,7 +117,4 @@ uint32_t loadUMain(void) {
 			}
 	}
 	return Elf->entry;
-//	enterUserSpace((uint32_t)Elf->entry);
 }
-
-#undef base

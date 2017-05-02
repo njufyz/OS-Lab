@@ -19,9 +19,14 @@ void irqHandle(struct TrapFrame *tf) {
 	 * 中断处理程序
 	 */
 	/* Reassign segment register */
+
+	//设置段寄存器
+	asm volatile("movw %%ax,%%ds":: "a" (KSEL(SEG_KDATA)));
+	
 	current->tf = tf;
 	putChar(current->pid + '0');
 	putChar('\n');
+	
 	switch(tf->irq) {
 		case -1:
 			break;
@@ -33,7 +38,7 @@ void irqHandle(struct TrapFrame *tf) {
 			break;
 		case 32:	
 			current = &pcb[0];
-			tss.esp0 = (uint32_t)current->stack + 4096;
+			tss.esp0 = (uint32_t)current->stack + KSTACK_SIZE;
 			break;
 		case 46:
 		    break;

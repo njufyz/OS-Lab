@@ -1,7 +1,8 @@
 #ifndef __X86_MEMORY_H__
 #define __X86_MEMORY_H__
 
-#define base 0x200000
+#define base 0x300000
+#define KSTACK_SIZE 4096
 
 #define DPL_KERN                0
 #define DPL_USER                3
@@ -17,12 +18,14 @@
 #define STS_TG32    0xF         // 32-bit Trap Gate
 
 // GDT entries
-#define NR_SEGMENTS      7           // GDT size
-#define SEG_KCODE   1           // Kernel code
-#define SEG_KDATA   2           // Kernel data/stack
-#define SEG_UCODE   3           // User code
-#define SEG_UDATA   4           // User data/stack
-#define SEG_TSS     5           // Global unique task state segement
+#define NR_SEGMENTS      9           // GDT size
+#define SEG_KCODE        1           // Kernel code
+#define SEG_KDATA        2           // Kernel data/stack
+#define SEG_UCODE        3           // User code
+#define SEG_UDATA        4           // User data/stack
+#define SEG_UCODE_C      5           // User2 code
+#define SEG_UDATA_C      6           // User2 data/stack
+#define SEG_TSS          7           // Global unique task state segement
 
 // Selectors
 #define KSEL(desc) (((desc) << 3) | DPL_KERN)
@@ -55,7 +58,7 @@ typedef struct TrapFrame TrapFrame;
 
 typedef struct  {
 	TrapFrame *tf;
-	unsigned char stack[4096];
+	unsigned char stack[KSTACK_SIZE];
 	int state;
 	int time_count;
 	int sleep_time;
@@ -137,4 +140,15 @@ static inline void lLdt(uint16_t sel)
 	asm volatile("lldt %0" :: "r"(sel));
 }
 
+
+static inline void* memcpy_s(void* dest, void* src, uint32_t count)
+{
+ char *tmp = dest;  
+ const char *s = src;  
+   
+ while (count--)  
+  *tmp++ = *s++ ;  
+    
+ return dest;  
+}
 #endif

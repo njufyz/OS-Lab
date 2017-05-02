@@ -1,6 +1,6 @@
 #include "x86.h"
 #include "device.h"
-#define base 0x200000
+
 
 void SYS_write(struct TrapFrame *tf)
 {
@@ -11,7 +11,8 @@ void SYS_write(struct TrapFrame *tf)
 
 void SYS_fork(struct TrapFrame *tf)
 {
-    assert(0);
+    //assert(0);
+    
 }
 
 void SYS_sleep(struct TrapFrame *tf)

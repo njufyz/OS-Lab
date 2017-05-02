@@ -4,18 +4,16 @@
 
 void kEntry(void) {
    
-	initSerial();// initialize serial port
-	initIdt(); // initialize idt
-	initIntr(); // iniialize 8259a
-	initSeg(); // initialize gdt, tss
-	initTimer(); //initialize timer 
-
-	initPCB();
-	//loadUMain();
-	int Entry = loadUMain();
-	initUserProcess(Entry);
-
-	asm volatile("movl %%eax, %%esp":: "a" (idle.stack + 4096));
+	initSerial();	// initialize serial port
+	initIdt();		// initialize idt
+	initIntr(); 	// iniialize 8259a
+	initSeg(); 		// initialize gdt, tss
+	initTimer(); 	//initialize timer 
+	initPCB();      //initialize PCB
+	initUserProcess();
+	
+	//set up kernel stack
+	asm volatile("movl %%eax, %%esp":: "a" (idle.stack + KSTACK_SIZE));
 	
 	enableInterrupt();
 	 
@@ -23,6 +21,7 @@ void kEntry(void) {
 	{
 		waitForInterrupt();
 	}
+	
 	while(1);
 	assert(0);
 }

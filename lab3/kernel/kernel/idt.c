@@ -11,7 +11,7 @@ struct GateDescriptor idt[NR_IRQ]; // NR_IRQ=256, defined in x86/cpu.h
 static void setIntr(struct GateDescriptor *ptr, uint32_t selector, uint32_t offset, uint32_t dpl) {
 	ptr->offset_15_0 = offset & 0xFFFF;
 	ptr->segment = selector << 3;
-	ptr->pad0 = 0;
+	ptr->pad0 = 
 	ptr->type = INTERRUPT_GATE_32;
 	ptr->system = FALSE;
 	ptr->privilege_level = dpl;

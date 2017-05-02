@@ -53,6 +53,8 @@ static inline void outByte(uint16_t port, int8_t data) {
 void printk(const char*fmt, ...);
 void putc(char ch);
 void puts(uint32_t s, int lenth);
-
+int strlen(const char* str);
+void strcpy(char* str, const char*s );
+void strcat(char*dest, const char*s);
 
 #endif

@@ -36,14 +36,10 @@ asm_do_irq:
 	push %es
 	pushl %esp
 
-	movw $0x10, %ax
-	movw %ax,   %es
-	movw %ax,   %ds
-
 	call irqHandle
 
 	#addl $4, %esp
-	movl (current), %eax
+	movl (current), %eax        
 	movl (%eax), %esp
 
 	pop %es
