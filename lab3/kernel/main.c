@@ -14,7 +14,6 @@ void kEntry(void) {
 	
 	//set up kernel stack
 	asm volatile("movl %%eax, %%esp":: "a" (idle.stack + KSTACK_SIZE));
-	
 	enableInterrupt();
 	 
 	while(1)

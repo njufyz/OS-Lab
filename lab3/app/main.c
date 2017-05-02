@@ -2,7 +2,7 @@
 #include "types.h"
 
 int uEntry(void) {
-
+/*
 	printf("printf test begin...\n");
 	printf("the answer should be:\n");
 	printf("#######################################################\n");
@@ -25,6 +25,17 @@ int uEntry(void) {
 	printf("=======================================================\n");
 	printf("Test end!!! Good luck!!!\n");
 	//fork();
+	*/
+	int x = fork();
+	int c = 0;
+	int i = 0;
+	int j = 0;
+	while(c++ < 0x7ff)
+	{
+		if(x == 0)  j++;
+		else		i++;
+	}
+	printf("%d %d\n", i, j);
 	while(1);
 	return 0;
 }

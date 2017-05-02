@@ -1,6 +1,5 @@
 #include "lib.h"
 #include "types.h"
-
 #include<stdarg.h>
 
 #define NULL ((void*)0)
@@ -155,4 +154,9 @@ int sleep(uint32_t time)
 int exit()
 {
      return syscall(SYS_EXIT, 0, 0, 0, 0, 0);
+}
+
+int getpid()
+{
+    return syscall(SYS_GETPID, 0, 0, 0, 0, 0);
 }

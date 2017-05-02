@@ -36,17 +36,19 @@ void initPCB()
 
 
 void
-initUserProcess(unsigned int Entry) {
+initUserProcess() {
 	pcb[0].tf = (void*)(pcb[0].stack + KSTACK_SIZE - sizeof(TrapFrame));
 	pcb[0].state = RUNNABLE;
-	pcb[0].time_count = 10;
-	pcb[0].sleep_time = 10;
-	pcb[0].tf->ss = USEL(SEG_UDATA);
+	pcb[0].time_count = RUNTIME;
+	pcb[0].sleep_time =  0;
 	pcb[0].tf->esp = base;
 	pcb[0].tf->eflags = 0x202;
 	pcb[0].tf->eip = loadUMain();
+
+    pcb[0].tf->ss = USEL(SEG_UDATA);
 	pcb[0].tf->cs = USEL(SEG_UCODE);
 	pcb[0].tf->es = USEL(SEG_UDATA);
 	pcb[0].tf->ds = USEL(SEG_UDATA);
 	
 }
+

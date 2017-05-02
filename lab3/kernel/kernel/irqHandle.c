@@ -2,17 +2,21 @@
 #include "device.h"
 
 extern PCB* current;
+extern PCB idle;
 extern TSS tss;
 
-void syscallHandle(struct TrapFrame *tf);
-
+void SyscallHandle(struct TrapFrame *tf);
 void GProtectFaultHandle(struct TrapFrame *tf);
+void TimerHandle(struct TrapFrame *tf);
 
+int SYS_exit(struct TrapFrame *tf);
+int SYS_fork(struct TrapFrame *tf);
+int SYS_write(struct TrapFrame *tf);
+int SYS_sleep(struct TrapFrame *tf);
+int SYS_getpid(struct TrapFrame *tf);
 
-void SYS_exit(struct TrapFrame *tf);
-void SYS_fork(struct TrapFrame *tf);
-void SYS_write(struct TrapFrame *tf);
-void SYS_sleep(struct TrapFrame *tf);
+void schedule();
+void wake(int i);
 
 void irqHandle(struct TrapFrame *tf) {
 	/*
@@ -24,8 +28,7 @@ void irqHandle(struct TrapFrame *tf) {
 	asm volatile("movw %%ax,%%ds":: "a" (KSEL(SEG_KDATA)));
 	
 	current->tf = tf;
-	putChar(current->pid + '0');
-	putChar('\n');
+	
 	
 	switch(tf->irq) {
 		case -1:
@@ -34,11 +37,13 @@ void irqHandle(struct TrapFrame *tf) {
 			GProtectFaultHandle(tf);
 			break;
 		case 0x80:
-			syscallHandle(tf);
+			SyscallHandle(tf);
 			break;
 		case 32:	
-			current = &pcb[0];
-			tss.esp0 = (uint32_t)current->stack + KSTACK_SIZE;
+		//	putChar(current->pid + '0');
+		//	putChar('\n');
+			TimerHandle(tf);
+			schedule();
 			break;
 		case 46:
 		    break;
@@ -49,21 +54,16 @@ void irqHandle(struct TrapFrame *tf) {
 }
 
 
-void syscallHandle(struct TrapFrame *tf) {
+void SyscallHandle(struct TrapFrame *tf) {
 	/* 实现系统调用*/
-	/*if(tf->eax == 4)		//SYS_write
-		SYS_write(tf);		//Implement in do_syscall.c
-	
-	else 				
-		assert(0);
-		*/
 	switch (tf->eax)
 	{
-		case SYS_EXIT:  SYS_exit(tf);    break;
+		case SYS_EXIT:  tf->eax = SYS_exit(tf);  break;
 		case SYS_FORK:  SYS_fork(tf);  break;
 
-		case SYS_WRITE: SYS_write(tf); break;
-		case SYS_SLEEP: SYS_sleep(tf); break;
+		case SYS_WRITE: tf->eax = SYS_write(tf); break;
+		case SYS_SLEEP: tf->eax = SYS_sleep(tf); break;
+		case SYS_GETPID: tf->eax = SYS_getpid(tf); break;
 		default:assert(0);
 	}
 }
@@ -73,3 +73,93 @@ void GProtectFaultHandle(struct TrapFrame *tf){
 	assert(0);
 	return;
 }
+
+void TimerHandle(struct TrapFrame *tf){
+	putChar(current->pid + '0');
+	int i;
+	for(i = 0; i < PCB_MAX; i++)
+	{
+		if(pcb[i].state == RUNNING)
+		{
+			pcb[i].time_count--;
+		}
+		if(pcb[i].state == BLOCKED)
+		{
+			pcb[i].sleep_time--;
+			if(pcb[i].sleep_time == 0)
+				wake(i);
+		}
+	}
+
+}
+
+void schedule()
+{
+	if(current != &idle && current->time_count>0)
+		return ;
+
+    if(current == &idle)
+	{
+		if(pcb[0].state == RUNNABLE && pcb[1].state != RUNNABLE)
+			{
+				current->state = RUNNABLE;
+				current = &pcb[0];
+				current->state = RUNNING;
+				current->time_count = RUNTIME;
+			}
+		else if(pcb[1].state == RUNNABLE && pcb[0].state != RUNNABLE)
+			{
+				current->state = RUNNABLE;
+				current = &pcb[1];
+				current->state = RUNNING;
+				current->time_count = RUNTIME;
+			}
+	}
+
+	else if(pcb[0].state == RUNNING)
+	{
+		if(pcb[1].state == RUNNABLE)
+		{
+			current->state = RUNNABLE;
+			current->time_count = RUNTIME;
+			current = &pcb[1];
+			current->state = RUNNING;
+			current->time_count = RUNTIME;
+		}
+		else 
+		{
+			current->state = RUNNABLE;
+			current = &idle;
+			current->state = RUNNING;
+			current->time_count = RUNTIME;
+		}
+	}
+
+	else if(pcb[1].state == RUNNING)
+	{
+		if(pcb[0].state == RUNNABLE)
+		{
+			current->state = RUNNABLE;
+			current->time_count = RUNTIME;
+			current = &pcb[0];
+			current->state = RUNNING;
+			current->time_count = RUNTIME;
+		}
+		else 
+		{
+			current->state = RUNNABLE;
+			current = &idle;
+			current->state = RUNNING;
+			current->time_count = RUNTIME;
+		}
+	}
+
+	else  assert(0);
+	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
+}
+
+void wake(int i)
+{
+	return ;
+}
+

@@ -3,5 +3,6 @@
 
 void printf(const char *format,...);
 int fork();
+int getpid();
 
 #endif

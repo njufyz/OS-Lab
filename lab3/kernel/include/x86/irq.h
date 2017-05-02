@@ -11,6 +11,7 @@ void initTimer();
 #define SYS_READ 3
 #define SYS_WRITE 4
 #define SYS_SLEEP 5
+#define SYS_GETPID 6
 
 
 #endif
