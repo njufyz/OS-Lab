@@ -1,8 +1,11 @@
 #include "x86.h"
 #include "device.h"
+#include "common.h"
 
 extern PCB* current;
-extern SegDesc gdt[NR_SEGMENTS];
+extern int processnum;
+extern int processnum;
+extern int pronum;
 
 void schedule();
 
@@ -17,7 +20,9 @@ int SYS_fork(struct TrapFrame *tf)
     pcb[1].state = RUNNABLE;
     pcb[1].sleep_time = 0;
     pcb[1].time_count = RUNTIME;
-   
+    EnQueue(1);
+    
+
     memcpy((unsigned char*) (2 * base), (unsigned char*)base, base);
     memcpy((unsigned char*)pcb[1].stack, (unsigned char*)pcb[0].stack, KSTACK_SIZE);
     
@@ -26,11 +31,9 @@ int SYS_fork(struct TrapFrame *tf)
 	pcb[1].tf->cs = USEL(SEG_UCODE_C);
 	pcb[1].tf->es = USEL(SEG_UDATA_C);
 	pcb[1].tf->ds = USEL(SEG_UDATA_C);
-    pcb[1].tf->eax = 2;
-    pcb[1].pid = 2;
-
-    current->tf->eax = 0;
-    return 0;
+    pcb[1].tf->eax = 0;
+    pronum++;
+    return 2;
 }
 
 int SYS_sleep(struct TrapFrame *tf)
@@ -45,7 +48,11 @@ int SYS_sleep(struct TrapFrame *tf)
 
 int SYS_exit(struct TrapFrame *tf)
 {
-    assert(0);
+   // assert(0);
+    current->state = DEAD;
+    current->time_count = 0;
+   pronum--;
+    schedule();
     return 0;
 }
 

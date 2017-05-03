@@ -6,5 +6,6 @@ void printf(const char *format,...);
 int fork();
 int getpid();
 int sleep(uint32_t time);
+int exit();
 
 #endif

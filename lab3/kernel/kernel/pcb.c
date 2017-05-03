@@ -1,20 +1,11 @@
 #include "x86.h"
 #include "device.h"
-
-//enum stat{NEW, RUNABLE, RUNNING, BLOCKED, DEAD};
-/*typedef struct  {
-	TrapFrame *tf;
-	unsigned char stack[4096];
-	int state;
-	int time_count;
-	int sleep_time;
-	unsigned int pid;
-}PCB;
-*/
+#include "common.h"
 
 PCB pcb[PCB_MAX];
 PCB idle;
 PCB *current = &idle;
+int pronum = 1;
 
 extern TSS tss;
 
@@ -39,6 +30,8 @@ void
 initUserProcess() {
 	pcb[0].tf = (void*)(pcb[0].stack + KSTACK_SIZE - sizeof(TrapFrame));
 	pcb[0].state = RUNNABLE;
+	EnQueue(0);
+
 	pcb[0].time_count = RUNTIME;
 	pcb[0].sleep_time =  0;
 	pcb[0].tf->esp = base;

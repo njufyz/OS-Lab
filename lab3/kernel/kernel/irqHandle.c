@@ -1,9 +1,11 @@
 #include "x86.h"
 #include "device.h"
+#include "common.h"
 
 extern PCB* current;
 extern PCB idle;
 extern TSS tss;
+extern int pronum;
 
 void SyscallHandle(struct TrapFrame *tf);
 void GProtectFaultHandle(struct TrapFrame *tf);
@@ -33,18 +35,19 @@ void irqHandle(struct TrapFrame *tf) {
 	switch(tf->irq) {
 		case -1:
 			break;
+
 		case 0xd:
 			GProtectFaultHandle(tf);
 			break;
+
 		case 0x80:
 			SyscallHandle(tf);
 			break;
+
 		case 32:	
-		//	putChar(current->pid + '0');
-		//	putChar('\n');
 			TimerHandle(tf);
-			schedule();
 			break;
+			
 		case 46:
 		    break;
 
@@ -64,6 +67,7 @@ void SyscallHandle(struct TrapFrame *tf) {
 		case SYS_WRITE: tf->eax = SYS_write(tf); break;
 		case SYS_SLEEP: tf->eax = SYS_sleep(tf); break;
 		case SYS_GETPID:tf->eax = SYS_getpid(tf); break;
+
 		default:assert(0);
 	}
 }
@@ -75,24 +79,33 @@ void GProtectFaultHandle(struct TrapFrame *tf){
 }
 
 void TimerHandle(struct TrapFrame *tf){
-	putChar(current->pid + '0');
-	/*int i;
+	//putChar(current->pid + '0');
+	int i;
 	for(i = 0; i < PCB_MAX; i++)
 	{
 		if(pcb[i].state == RUNNING)
 		{
 			pcb[i].time_count--;
-			if(pcb[i].time_count <= 0)
-				pcb[i].state = BLOCKED;
+			if(pcb[i].time_count == 0)
+			{
+				EnQueue(i);
+				pcb[i].state = RUNNABLE;
+				//pcb[i].time_count = RUNTIME;
+			}
 		}
+		
 		if(pcb[i].state == BLOCKED)
 		{
 			pcb[i].sleep_time--;
 			if(pcb[i].sleep_time == 0)
-				wake(i);
+			{
+				EnQueue(i);
+				pcb[i].state = RUNNABLE;
+				//pcb[i].time_count = RUNTIME;
+			}
 		}
 	}
-	*/
+	schedule();
 }
 
 void schedule()
@@ -100,78 +113,21 @@ void schedule()
 	if(current != &idle && current->time_count > 0)
 		return ;
 
-    if(current == &idle)
-	{
-		if(pcb[0].state == RUNNABLE && pcb[1].state != RUNNABLE)
-			{
-				current->state = RUNNABLE;
-				current = &pcb[0];
-				current->state = RUNNING;
-				current->time_count = RUNTIME;
-			}
-		else if(pcb[1].state == RUNNABLE && pcb[0].state != RUNNABLE)
-			{
-				current->state = RUNNABLE;
-				current = &pcb[1];
-				current->state = RUNNING;
-				current->time_count = RUNTIME;
-			}
-		else 
-		{
-				current->state = RUNNABLE;
-				current = &pcb[0];
-				current->state = RUNNING;
-				current->time_count = RUNTIME;
-		}
-	}
+	if(pronum == 0)
+		current = &idle;
 
-	else if(pcb[0].state == RUNNING || pcb[0].state == BLOCKED)
-	{
-		if(pcb[1].state == RUNNABLE)
-		{
-			current->state = BLOCKED;
-			current->time_count = 0;
-			current = &pcb[1];
-			current->state = RUNNING;
-			current->time_count = RUNTIME;
-		}
-		else 
-		{
-			current->state = BLOCKED;
-			current->time_count = 0;
-			current = &idle;
-			current->state = RUNNING;
-			current->time_count = RUNTIME;
-		}
-	}
+	else if(IsEmpty() == 1)
+		current = &idle;
 
-	else if(pcb[1].state == RUNNING || pcb[1].state == BLOCKED)
+	else
 	{
-		if(pcb[0].state == RUNNABLE)
-		{
-			current->state = BLOCKED;
-			current->time_count = 0;
-			current = &pcb[0];
-			current->state = RUNNING;
-			current->time_count = RUNTIME;
-		}
-		else 
-		{
-			current->state = BLOCKED;
-			current->time_count = 0;
-			current = &idle;
-			current->state = RUNNING;
-			current->time_count = RUNTIME;
-		}
+		int t = DeQueue();
+		current = &pcb[t];
+		current->state = RUNNING;
+		current->time_count = RUNTIME;
 	}
-
-	else  assert(0);
+	//putChar(current->pid + '0');
 	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
 }
 
-void wake(int i)
-{
-	pcb[i].state = RUNNABLE;
-	pcb[i].time_count = RUNTIME;
-}
 
