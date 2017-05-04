@@ -6,7 +6,7 @@ int data = 0;
 int uEntry(void) {
 
     int ret = fork();
-    int i = 4;
+    int i = 8;
 
     if (ret == 0) {
         data = 2;
@@ -14,7 +14,6 @@ int uEntry(void) {
             i --;
             printf("Child Process: Pong %d, %d;\n", data, i);
             sleep(128);
-           // printf("1");
         }
         exit();
     }
@@ -24,18 +23,9 @@ int uEntry(void) {
             i --;
             printf("Father Process: Ping %d, %d;\n", data, i);
             sleep(128);
-          //  printf("2");
         }
         exit();
     }
-    
-    /*int x = fork();
-    while(1)
-    {
-        if(x == 0)
-            printf("1");
-        else printf("0");
-    }*/
     while(1); 
     
     return 0;

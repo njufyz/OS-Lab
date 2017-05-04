@@ -18,10 +18,11 @@ int SYS_sleep(struct TrapFrame *tf);
 int SYS_getpid(struct TrapFrame *tf);
 
 void schedule();
-void wake(int i);
 
 void irqHandle(struct TrapFrame *tf) {
+	
 	current->tf = tf;
+
 	switch(tf->irq) {
 		case -1:
 			break;
@@ -71,7 +72,7 @@ void GProtectFaultHandle(struct TrapFrame *tf){
 }
 
 void TimerHandle(struct TrapFrame *tf){
-	//putChar(current->pid + '0');
+	putChar(current->pid + '0');
 	int i;
 	for(i = 0; i < PCB_MAX; i++)
 	{
@@ -99,27 +100,4 @@ void TimerHandle(struct TrapFrame *tf){
 	}
 	schedule();
 }
-
-void schedule()
-{
-	if(current != &idle && current->time_count > 0)
-		return ;
-
-	if(pronum == 0)
-		current = &idle;
-
-	else if(IsEmpty() == 1)
-		current = &idle;
-
-	else
-	{
-		int t = DeQueue();
-		current = &pcb[t];
-		current->state = RUNNING;
-		current->time_count = RUNTIME;
-	}
-//	putChar(current->pid + '0');
-	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
-}
-
 

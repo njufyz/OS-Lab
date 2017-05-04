@@ -51,3 +51,27 @@ initUserProcess() {
 	EnQueue(0);
 }
 
+void schedule()
+{
+	if(current != &idle && current->time_count > 0)
+		return ;
+
+	if(pronum == 0)
+		current = &idle;
+
+	else if(IsEmpty() == 1)
+		current = &idle;
+
+	else
+	{
+		int t = DeQueue();
+		current = &pcb[t];
+		current->state = RUNNING;
+		current->time_count = RUNTIME;
+	}
+	//putChar(current->pid + '0');
+	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
+}
+
+
+
