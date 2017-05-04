@@ -21,17 +21,7 @@ void schedule();
 void wake(int i);
 
 void irqHandle(struct TrapFrame *tf) {
-	/*
-	 * 中断处理程序
-	 */
-	/* Reassign segment register */
-
-	//设置段寄存器
-	asm volatile("movw %%ax,%%ds":: "a" (KSEL(SEG_KDATA)));
-	
 	current->tf = tf;
-	
-	
 	switch(tf->irq) {
 		case -1:
 			break;
@@ -46,6 +36,9 @@ void irqHandle(struct TrapFrame *tf) {
 
 		case 32:	
 			TimerHandle(tf);
+			break;
+		
+		case 33:	
 			break;
 			
 		case 46:
@@ -63,7 +56,6 @@ void SyscallHandle(struct TrapFrame *tf) {
 	{
 		case SYS_EXIT:  tf->eax = SYS_exit(tf);  break;
 		case SYS_FORK:  tf->eax = SYS_fork(tf);  break;
-
 		case SYS_WRITE: tf->eax = SYS_write(tf); break;
 		case SYS_SLEEP: tf->eax = SYS_sleep(tf); break;
 		case SYS_GETPID:tf->eax = SYS_getpid(tf); break;
@@ -126,7 +118,7 @@ void schedule()
 		current->state = RUNNING;
 		current->time_count = RUNTIME;
 	}
-	//putChar(current->pid + '0');
+//	putChar(current->pid + '0');
 	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
 }
 

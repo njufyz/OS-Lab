@@ -32,18 +32,28 @@
 asm_do_irq:
 	pushal
 
-	push %ds
-	push %es
+	pushl %ds
+  	pushl %es
+  	pushl %fs
+  	pushl %gs
+
 	pushl %esp
+
+#设置段寄存器
+	movw $0x10, %ax
+	movw %ax, %ds
+	movw %ax, %es
 
 	call irqHandle
 
-	#addl $4, %esp
+#恢复/切换栈
 	movl (current), %eax        
 	movl (%eax), %esp
 
-	pop %es
-    pop %ds
+	popl %gs
+  	popl %fs
+  	popl %es
+  	popl %ds
 
 	popal
 

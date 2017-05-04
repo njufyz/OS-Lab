@@ -22,6 +22,23 @@ void clear(){
 	}
 }
 
+void scroll()
+{
+    if(y >= 25)
+    {
+        memcpy((void*)(0xb800), (void*)0xb800 + 80, 80 * 24 * 2);
+        int i;
+        int16_t* word;
+        for(i = 0; i < 80; i++)
+	    {	
+		    word = (int16_t *)0xB8000 + (24 * 80 + i); 
+    	    *word = ' ' | (0xc << 8);
+	    } 
+        y--;
+    }
+}
+
+
 void putc(char ch){
      //putChar(ch);
 	if(ch != '\n')
@@ -32,11 +49,15 @@ void putc(char ch){
 		{
 			x = 0;
 			y++;
+            if(y>=25)
+             scroll();
 		}
 	}
 	else
 	{
 		x = 0;
+         if(y>=25)
+            scroll();
 		y++;
 	}
 }

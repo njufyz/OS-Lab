@@ -48,12 +48,14 @@ struct GateDescriptor {
 };*/
 
 struct TrapFrame {
-    uint32_t es, ds;
+    uint32_t gs, fs, es, ds;
     uint32_t edi, esi, ebp, xxx, ebx, edx, ecx, eax;
     uint32_t irq;                   // 中断号
     uint32_t error;                 // Error Code
     uint32_t eip, cs, eflags, esp, ss;
 };
+
+
 typedef struct TrapFrame TrapFrame;
 
 typedef struct  {
@@ -147,8 +149,9 @@ static inline void* memcpy(void* dest, void* src, uint32_t count)
  const char *s = src;  
    
  while (count--)  
-  *tmp++ = *s++ ;  
-    
+  //*tmp++ = *s++ ;  
+     *(tmp + count) = *(s + count);   
  return dest;  
 }
+
 #endif

@@ -8,6 +8,7 @@ typedef          short int16_t;
 typedef unsigned char  uint8_t;
 typedef          char  int8_t;
 typedef unsigned char  boolean;
+#define NULL ((void*)0)
 
 typedef uint32_t size_t;
 typedef int32_t  pid_t;

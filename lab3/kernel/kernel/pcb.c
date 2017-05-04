@@ -28,12 +28,16 @@ void initPCB()
 
 void
 initUserProcess() {
-	pcb[0].tf = (void*)(pcb[0].stack + KSTACK_SIZE - sizeof(TrapFrame));
-	pcb[0].state = RUNNABLE;
-	EnQueue(0);
 
+    //设置tf指向TrapFrame首地址
+	pcb[0].tf = (void*)(pcb[0].stack + KSTACK_SIZE - sizeof(TrapFrame));
+
+    //设置状态、运行时间片
+	pcb[0].state = RUNNABLE;
 	pcb[0].time_count = RUNTIME;
 	pcb[0].sleep_time =  0;
+
+    //设置TrapFrame的内容
 	pcb[0].tf->esp = base;
 	pcb[0].tf->eflags = 0x202;
 	pcb[0].tf->eip = loadUMain();
@@ -42,6 +46,8 @@ initUserProcess() {
 	pcb[0].tf->cs = USEL(SEG_UCODE);
 	pcb[0].tf->es = USEL(SEG_UDATA);
 	pcb[0].tf->ds = USEL(SEG_UDATA);
-	
+
+    //进程进入就绪队列
+	EnQueue(0);
 }
 
