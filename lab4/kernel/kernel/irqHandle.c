@@ -87,7 +87,7 @@ void TimerHandle(struct TrapFrame *tf){
 			}
 		}
 		
-		if(pcb[i].state == BLOCKED)
+		if(pcb[i].state == SLEEPING)
 		{
 			pcb[i].sleep_time--;
 			if(pcb[i].sleep_time == 0)

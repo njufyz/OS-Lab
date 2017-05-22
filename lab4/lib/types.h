@@ -13,6 +13,11 @@ typedef unsigned char  boolean;
 typedef uint32_t size_t;
 typedef int32_t  pid_t;
 
+struct Semaphore {
+    int value;
+};
+typedef struct Semaphore sem_t;
+
 #define SYS_EXIT 1
 #define SYS_FORK 2
 #define SYS_READ 3

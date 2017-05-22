@@ -6,6 +6,7 @@
 #include "x86/io.h"
 #include "x86/irq.h"
 #include "x86/pcb.h"
+#include "x86/semaphore.h"
 
 void initSeg(void);
 uint32_t loadUMain(void);

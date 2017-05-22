@@ -49,7 +49,7 @@ int SYS_fork(struct TrapFrame *tf)
 int SYS_sleep(struct TrapFrame *tf)
 {
     int time = tf->ebx;
-    current->state = BLOCKED;
+    current->state = SLEEPING;
     current->time_count = 0;
     current->sleep_time = time;
     schedule();

@@ -1,6 +1,8 @@
 #ifndef __X86_MEMORY_H__
 #define __X86_MEMORY_H__
 
+#include "semaphore.h"
+
 #define base 0x300000
 #define KSTACK_SIZE 8192
 
@@ -42,11 +44,6 @@ struct GateDescriptor {
 	uint32_t offset_31_16     : 16;
 };
 
-/*struct TrapFrame {
-	uint32_t edi, esi, ebp, xxx, ebx, edx, ecx, eax;
-	int32_t irq;
-};*/
-
 struct TrapFrame {
     uint32_t gs, fs, es, ds;
     uint32_t edi, esi, ebp, xxx, ebx, edx, ecx, eax;
@@ -55,9 +52,9 @@ struct TrapFrame {
     uint32_t eip, cs, eflags, esp, ss;
 };
 
-
 typedef struct TrapFrame TrapFrame;
 
+/*---------------------------------------------*/
 typedef struct  {
 	TrapFrame *tf;
 	unsigned char stack[KSTACK_SIZE];
@@ -153,5 +150,6 @@ static inline void* memcpy(void* dest, void* src, uint32_t count)
      *(tmp + count) = *(s + count);   
  return dest;  
 }
+
 
 #endif

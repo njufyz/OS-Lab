@@ -3,7 +3,7 @@
 
 #define PCB_MAX 2
 #define RUNTIME 10
-enum stat{NEW, RUNNABLE, RUNNING, BLOCKED, DEAD};
+enum stat{NEW, RUNNABLE, RUNNING, SLEEPING, BLOCKED, DEAD};
 
 
 void initPCB();
