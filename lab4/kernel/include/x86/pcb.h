@@ -10,7 +10,11 @@ void initPCB();
 void initUserProcess();
 void schedule();
 
-extern PCB idle;
 extern PCB pcb[PCB_MAX];
+
+extern PCB* current;
+extern PCB idle;
+extern TSS tss;
+extern int pronum;
 
 #endif

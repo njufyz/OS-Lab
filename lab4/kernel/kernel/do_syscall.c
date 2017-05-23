@@ -2,13 +2,6 @@
 #include "device.h"
 #include "common.h"
 
-extern PCB* current;
-extern int processnum;
-extern int processnum;
-extern int pronum;
-
-void schedule();
-
 int SYS_write(struct TrapFrame *tf)
 {
 	puts(tf->ecx + base * (current->pid), tf->edx);

@@ -7,8 +7,6 @@ PCB idle;
 PCB *current = &idle;
 int pronum = 1;
 
-extern TSS tss;
-
 void initPCB()
 {
     current = &idle;   

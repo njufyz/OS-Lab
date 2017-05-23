@@ -3,7 +3,6 @@
 #include "common.h"
 
 sem_t sem;
-extern PCB* current;
 
 int SYS_sem_init(struct TrapFrame *tf)
 {
