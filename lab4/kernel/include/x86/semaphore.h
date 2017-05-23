@@ -7,7 +7,5 @@ struct Semaphore {
 
 typedef struct Semaphore sem_t;
 
-void P(sem_t *p);
-void V(sem_t *p);
 
 #endif

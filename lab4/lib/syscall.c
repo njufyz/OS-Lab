@@ -70,3 +70,23 @@ int getpid()
 {
     return syscall(SYS_GETPID, 0, 0, 0, 0, 0);
 }
+
+int sem_init(sem_t *sem, uint32_t value)
+{
+    return syscall(SYS_SEM_INIT, value, 0, 0, 0, 0);
+}
+
+int sem_post(sem_t *sem)
+{
+    return syscall(SYS_SEM_POST, 0, 0, 0, 0, 0);
+}
+
+int sem_wait(sem_t *sem)
+{
+    return syscall(SYS_SEM_WAIT, 0, 0, 0, 0, 0);
+}
+
+int sem_destroy(sem_t *sem)
+{
+    return syscall(SYS_SEM_DESTROY, 0, 0, 0, 0, 0);
+}

@@ -52,6 +52,7 @@ int SYS_sleep(struct TrapFrame *tf)
     current->state = SLEEPING;
     current->time_count = 0;
     current->sleep_time = time;
+   // wEnQueue(current->pid);
     schedule();
     return 0;
 }

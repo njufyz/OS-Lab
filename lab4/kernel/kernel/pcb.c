@@ -53,6 +53,7 @@ initUserProcess() {
 
 void schedule()
 {
+	//putChar('0');
 	if(current != &idle && current->time_count > 0)
 		return ;
 
@@ -69,7 +70,7 @@ void schedule()
 		current->state = RUNNING;
 		current->time_count = RUNTIME;
 	}
-	putChar(current->pid + '0');
+//	putChar(current->pid + '0');
 	tss.esp0 =(uint32_t) current->stack + KSTACK_SIZE;
 }
 

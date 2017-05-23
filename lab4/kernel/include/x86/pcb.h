@@ -8,6 +8,7 @@ enum stat{NEW, RUNNABLE, RUNNING, SLEEPING, BLOCKED, DEAD};
 
 void initPCB();
 void initUserProcess();
+void schedule();
 
 extern PCB idle;
 extern PCB pcb[PCB_MAX];

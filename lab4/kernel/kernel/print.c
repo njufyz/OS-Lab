@@ -24,7 +24,7 @@ void clear(){
 
 void scroll()
 {
-    if(y >= 25)
+   if(y >= 25)
     {
         memcpy((void*)(0xb800), (void*)0xb800 + 80, 80 * 24 * 2);
         int i;
